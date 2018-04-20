@@ -1,0 +1,11 @@
+
+
+function fakevote()
+{ 	
+	
+}
+
+function truevote()
+{
+	
+}
