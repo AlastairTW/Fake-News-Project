@@ -7,6 +7,7 @@ import tensorflow as tf
 import warnings
 import math
 import sys
+import os
 from tensorflow.python.feature_column.feature_column import input_layer
 from cProfile import label
 from IPython.core.tests.test_formatters import numpy
@@ -14,9 +15,11 @@ from IPython.core.tests.test_formatters import numpy
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 import gensim as gensim
 
+dir = os.path.dirname(__file__)
+
 tf.logging.set_verbosity(tf.logging.INFO)
 print("Loading word2vec model...")
-model = gensim.models.KeyedVectors.load_word2vec_format('C:/Users/Ste/Desktop/FakeNews/GoogleNews-vectors-negative300.bin', binary=True)
+model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(dir, 'GoogleNews-vectors-negative300.bin'), binary=True)
 print("Word2vec loaded")
 
 def cnn_model_fn(features, labels, mode):
@@ -129,7 +132,7 @@ def cnn_model_fn(features, labels, mode):
     
     # Reduce loss during training using Stochastic gradient descent w/ learning rate of 0.001
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
@@ -152,7 +155,7 @@ def read_LIAR_data(pathname):
     lines = file.readlines()
     for line in lines:
         sections = line.split('\t')
-        if sections[1] == "pants-fire" or sections[1] == "false":
+        if sections[1] == "pants-fire" or sections[1] == "false" or sections[1] == "barely-true":
             labels.append(1) #One represents a lie
         else:
             labels.append(0) #Zero represents truth
@@ -182,11 +185,11 @@ def GetVectors(inputSentence):
 def train():
     # Load in training and evaluation data sets
     print("Reading training set...")
-    train_set = read_LIAR_data("C:/Users/Ste/Desktop/FakeNews/liar_dataset/train10000.tsv")
+    train_set = read_LIAR_data(os.path.join(dir, "liar_dataset/train.tsv"))
     train_data = np.asarray(train_set[0], dtype=np.float32)
     train_labels = np.asarray(train_set[1], dtype=np.int32)
     print("Training set read. Reading evaluation set...")
-    eval_set = read_LIAR_data("C:/Users/Ste/Desktop/FakeNews/liar_dataset/test.tsv")
+    eval_set = read_LIAR_data(os.path.join(dir, "liar_dataset/test.tsv"))
     eval_data = np.asarray(eval_set[0], dtype=np.float32)
     eval_labels = np.asarray(eval_set[1], dtype=np.int32)
     print("Evaluation set read")
@@ -197,7 +200,7 @@ def train():
     
     # Create an estimator
     fake_news_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn, model_dir="C:/Users/Ste/Desktop/FakeNews/CNN Checkpoints")
+        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN Checkpoints"))
     """ Create an estimator, passing the model created above, and a file path to output checkpoints """
     
     # Set up logging for predictions
@@ -216,7 +219,7 @@ def train():
     """ The 'settings' to use for training """
     fake_news_classifier.train(
         input_fn=train_input_fn,
-        steps=10000,
+        steps=20000,
         hooks=[logging_hook])
     """ Train the model using the settings and 5000 steps """
     
@@ -235,7 +238,7 @@ def train():
 def predict(sentence):
     # Create an estimator
     fake_news_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn, model_dir="C:/Users/Ste/Desktop/FakeNews/CNN Checkpoints")
+        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN Checkpoints"))
     """ Create an estimator, passing the model created above, and a file path to output checkpoints """
     sentence_vec = np.asarray(GetVectors(sentence), dtype=np.float32)
     predict_input_fn = tf.estimator.inputs.numpy_input_fn(
