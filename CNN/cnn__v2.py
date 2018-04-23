@@ -107,7 +107,7 @@ def cnn_model_fn(features, labels, mode):
     print(dropout)
     
     # Logits layer (prediction layer)
-    logits = tf.layers.dense(inputs=dropout, units=2)
+    logits = tf.layers.dense(inputs=dropout, units=6)
     """ Gives 2 outputs, one will represent truth, the other fake """
     # Output from this will be [batch_size, 2]
     
@@ -125,7 +125,7 @@ def cnn_model_fn(features, labels, mode):
     # If we're trying to predict, return the prediction
     
     # Calculate loss when training and evaluating
-    onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=2)
+    onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=6)
     """ This takes the lables (fake or thruth) for the sentence and converts it
         into a tensor. ie [1, 0] represents truth and [0, 1] represents lie.
         The input for lables should be a list of 0's and 1's. 0 representing that
@@ -139,7 +139,7 @@ def cnn_model_fn(features, labels, mode):
     
     # Reduce loss during training using Stochastic gradient descent w/ learning rate of 0.001
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.05)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
@@ -162,10 +162,18 @@ def read_LIAR_data(pathname):
     lines = file.readlines()
     for line in lines:
         sections = line.split('\t')
-        if sections[1] == "pants-fire" or sections[1] == "false" or sections[1] == "barely-true":
-            labels.append(1) #One represents a lie
+        if sections[1] == "pants-fire":
+            labels.append(0)
+        elif sections[1] == "false":
+            labels.append(1)
+        elif sections[1] == "barely-true":
+            labels.append(2) 
+        elif sections[1] == "half-true":
+            labels.append(3)
+        elif sections[1] == "mostly-true":
+            labels.append(4)
         else:
-            labels.append(0) #Zero represents truth
+            labels.append(5) 
         sentence = sections[2].split()
         vector = GetVectors(sentence)
         sentenceVectors.append(vector)
@@ -207,7 +215,7 @@ def train():
     
     # Create an estimator
     fake_news_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN Checkpoints"))
+        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN v2 Checkpoints"))
     """ Create an estimator, passing the model created above, and a file path to output checkpoints """
     
     # Set up logging for predictions
@@ -222,11 +230,12 @@ def train():
         y = train_labels,
         batch_size=100,
         num_epochs=None,
+        
         shuffle=True)
     """ The 'settings' to use for training """
     fake_news_classifier.train(
         input_fn=train_input_fn,
-        steps=10000,
+        steps=5000,
         hooks=[logging_hook])
     """ Train the model using the settings and 5000 steps """
     
@@ -245,7 +254,7 @@ def train():
 def predict(sentence):
     # Create an estimator
     fake_news_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN Checkpoints"))
+        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN v2 Checkpoints"))
     """ Create an estimator, passing the model created above, and a file path to output checkpoints """
     sentence_vec = np.asarray(GetVectors(sentence), dtype=np.float32)
     predict_input_fn = tf.estimator.inputs.numpy_input_fn(
@@ -258,7 +267,7 @@ def predict(sentence):
         
 def predictSite():
     fake_news_classifier = tf.estimator.Estimator(
-        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN Checkpoints"))
+        model_fn=cnn_model_fn, model_dir=os.path.join(dir, "CNN v2 Checkpoints"))
     """ Create an estimator, passing the model created above, and a file path to output checkpoints """
     site_vecs = []
     for s in siteData:
