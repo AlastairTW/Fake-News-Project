@@ -139,7 +139,7 @@ def cnn_model_fn(features, labels, mode):
     
     # Reduce loss during training using Stochastic gradient descent w/ learning rate of 0.001
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.05)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
@@ -235,7 +235,7 @@ def train():
     """ The 'settings' to use for training """
     fake_news_classifier.train(
         input_fn=train_input_fn,
-        steps=20000,
+        steps=5000,
         hooks=[logging_hook])
     """ Train the model using the settings and 5000 steps """
     

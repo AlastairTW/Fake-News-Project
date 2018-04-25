@@ -139,7 +139,7 @@ def cnn_model_fn(features, labels, mode):
     
     # Reduce loss during training using Stochastic gradient descent w/ learning rate of 0.001
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step())
@@ -196,7 +196,7 @@ def train():
     train_data = np.asarray(train_set[0], dtype=np.float32)
     train_labels = np.asarray(train_set[1], dtype=np.int32)
     print("Training set read. Reading evaluation set...")
-    eval_set = read_LIAR_data(os.path.join(dir, "liar_dataset/train.tsv"))
+    eval_set = read_LIAR_data(os.path.join(dir, "liar_dataset/test.tsv"))
     eval_data = np.asarray(eval_set[0], dtype=np.float32)
     eval_labels = np.asarray(eval_set[1], dtype=np.int32)
     print("Evaluation set read")
@@ -226,7 +226,7 @@ def train():
     """ The 'settings' to use for training """
     fake_news_classifier.train(
         input_fn=train_input_fn,
-        steps=1,
+        steps=10000,
         hooks=[logging_hook])
     """ Train the model using the settings and 5000 steps """
     
