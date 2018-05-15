@@ -8,16 +8,12 @@ import warnings
 import math
 import sys
 import os
-import urllib3
-import certifi
 import socket
 import threading
-from bs4 import BeautifulSoup
 from tensorflow.python.feature_column.feature_column import input_layer
 from cProfile import label
 from IPython.core.tests.test_formatters import numpy
 from html.parser import HTMLParser
-from _ssl import CERT_REQUIRED
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 import gensim as gensim
@@ -30,6 +26,8 @@ model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(dir, 'Googl
 print("Word2vec loaded")
 
 siteData = []
+
+
 
 class threader(threading.Thread):
         def __init__(self,threadID,name,counter):
@@ -61,26 +59,19 @@ def ServerStart():
                              print ("Message Recieved:" + str(data))
                              data = str(data).upper()
                      conn.close()
-                     Scraper(data)
-                     result = predictSite()
+                     parser = Parser()
+                     parser.feed('<html><head><title>Test</title></head>'
+                     '<body><h1>Parse me!</h1></body></html>')
+                     predictSite()
      except:
         conn.close()
+          
+
+
 
 class Parser(HTMLParser):
-    def handle_data(self, data):
-        sentences = data.split('.')
-        for sentence in sentences:
-            if len(sentence.split()) > 4:
-                siteData.append(sentence.strip())
-        
-def Scraper(URL):
-    http = urllib3.PoolManager(cert_reqs = 'CERT_REQUIRED', ca_certs=certifi.where())
-    request = http.request('GET', URL)
-    soup = BeautifulSoup(request.data.decode(), 'html.parser')
-    parser = Parser()
-    pTags = soup.find_all('p')
-    for p in pTags:
-        parser.feed(p.get_text())
+	def handle_data(self, data):
+		siteData.append(data)
 
 def cnn_model_fn(features, labels, mode):
     """Function to model the CNN"""
@@ -333,18 +324,16 @@ def predictSite():
     truthAverage = truthTotal / count
     fakeAverage = fakeTotal / count
     print("Result: {} {}".format(truthAverage, fakeAverage))
-    return truthAverage
 
 
 def main(unused_argv):
-     while True:
+    while True:
                 thread1 = threader(1,"Thread-1",1)
                 thread2 = threader(2,"Thread-2",2)
                 thread1.start()
                 thread1.join()
                 thread2.start()
-                thread2.join() 
-    
+                thread2.join()    
     #if len(sys.argv) < 2:
     #    print("No command given")
     #    print("    -t: Train CNN")
@@ -358,11 +347,10 @@ def main(unused_argv):
     #        return
     #    predict(sys.argv[2])
     #elif sys.argv[1] == "-x":
-    #    if len(sys.argv) < 3:
-    #        print("Enter a sentence in quotes to predict after -p")
-    #        return
-    #    Scraper(sys.argv[2])
-    #    result = predictSite()
+    #    parser = Parser()
+    #    parser.feed('<html><head><title>Test</title></head>'
+    #                '<body><h1>Parse me!</h1></body></html>')
+    #    predictSite()
     #else:
     #    print ("Unknown command: {}".format(sys.argv[1]))
         

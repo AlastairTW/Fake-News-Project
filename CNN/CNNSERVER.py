@@ -31,6 +31,9 @@ print("Word2vec loaded")
 
 siteData = []
 
+
+
+
 class threader(threading.Thread):
         def __init__(self,threadID,name,counter):
                 threading.Thread.__init__(self)
@@ -38,13 +41,13 @@ class threader(threading.Thread):
                 self.name = name
                 self.counter = counter
         def run(self):
-                #print ("starting " + self.name)
+                print ("starting " + self.name)
                 ServerStart()
-                #print("Exiting " + self.name)
+                print("Exiting " + self.name)
 
 
 def ServerStart():
-     host = "192.168.0.16"
+     host = socket.gethostbyname(socket.gethostname())
      port = 5000
      print ("hosting on " + host + ":" + str(port))
      mySocket = socket.socket()
@@ -60,9 +63,14 @@ def ServerStart():
                                      break
                              print ("Message Recieved:" + str(data))
                              data = str(data).upper()
-                     conn.close()
-                     Scraper(data)
-                     result = predictSite()
+                             Scraper(data)
+                             print('Data Sent to Scraper')
+                             result = predictSite()
+                             print(result)
+                             print('Sending Result to Web Client')
+                             conn.send(str(result).encode())
+                             
+                             conn.close()
      except:
         conn.close()
 

@@ -8,16 +8,10 @@ import warnings
 import math
 import sys
 import os
-import urllib3
-import certifi
-import socket
-import threading
-from bs4 import BeautifulSoup
 from tensorflow.python.feature_column.feature_column import input_layer
 from cProfile import label
 from IPython.core.tests.test_formatters import numpy
 from html.parser import HTMLParser
-from _ssl import CERT_REQUIRED
 
 warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 import gensim as gensim
@@ -31,56 +25,9 @@ print("Word2vec loaded")
 
 siteData = []
 
-class threader(threading.Thread):
-        def __init__(self,threadID,name,counter):
-                threading.Thread.__init__(self)
-                self.threadID = threadID
-                self.name = name
-                self.counter = counter
-        def run(self):
-                #print ("starting " + self.name)
-                ServerStart()
-                #print("Exiting " + self.name)
-
-
-def ServerStart():
-     host = "192.168.0.16"
-     port = 5000
-     print ("hosting on " + host + ":" + str(port))
-     mySocket = socket.socket()
-     mySocket.bind((host,port))
-     try:
-             mySocket.listen(1)
-             while True:
-                     conn, addr = mySocket.accept()
-                     #print ("Connection from: " + str(addr))
-                     while True:
-                             data = conn.recv(1024).decode()
-                             if not data:
-                                     break
-                             print ("Message Recieved:" + str(data))
-                             data = str(data).upper()
-                     conn.close()
-                     Scraper(data)
-                     result = predictSite()
-     except:
-        conn.close()
-
 class Parser(HTMLParser):
-    def handle_data(self, data):
-        sentences = data.split('.')
-        for sentence in sentences:
-            if len(sentence.split()) > 4:
-                siteData.append(sentence.strip())
-        
-def Scraper(URL):
-    http = urllib3.PoolManager(cert_reqs = 'CERT_REQUIRED', ca_certs=certifi.where())
-    request = http.request('GET', URL)
-    soup = BeautifulSoup(request.data.decode(), 'html.parser')
-    parser = Parser()
-    pTags = soup.find_all('p')
-    for p in pTags:
-        parser.feed(p.get_text())
+	def handle_data(self, data):
+		siteData.append(data)
 
 def cnn_model_fn(features, labels, mode):
     """Function to model the CNN"""
@@ -333,38 +280,28 @@ def predictSite():
     truthAverage = truthTotal / count
     fakeAverage = fakeTotal / count
     print("Result: {} {}".format(truthAverage, fakeAverage))
-    return truthAverage
 
 
 def main(unused_argv):
-     while True:
-                thread1 = threader(1,"Thread-1",1)
-                thread2 = threader(2,"Thread-2",2)
-                thread1.start()
-                thread1.join()
-                thread2.start()
-                thread2.join() 
-    
-    #if len(sys.argv) < 2:
-    #    print("No command given")
-    #    print("    -t: Train CNN")
-    #    print('    -p "Sentence to predict": Predict the given sentence')
-    #    return
-    #if sys.argv[1] == "-t":
-    #    train()
-    #elif sys.argv[1] == "-p":
-    #    if len(sys.argv) < 3:
-    #        print("Enter a sentence in quotes to predict after -p")
-    #        return
-    #    predict(sys.argv[2])
-    #elif sys.argv[1] == "-x":
-    #    if len(sys.argv) < 3:
-    #        print("Enter a sentence in quotes to predict after -p")
-    #        return
-    #    Scraper(sys.argv[2])
-    #    result = predictSite()
-    #else:
-    #    print ("Unknown command: {}".format(sys.argv[1]))
+    if len(sys.argv) < 2:
+        print("No command given")
+        print("    -t: Train CNN")
+        print('    -p "Sentence to predict": Predict the given sentence')
+        return
+    if sys.argv[1] == "-t":
+        train()
+    elif sys.argv[1] == "-p":
+        if len(sys.argv) < 3:
+            print("Enter a sentence in quotes to predict after -p")
+            return
+        predict(sys.argv[2])
+    elif sys.argv[1] == "-x":
+        parser = Parser()
+        parser.feed('<html><head><title>Test</title></head>'
+                    '<body><h1>Parse me!</h1></body></html>')
+        predictSite()
+    else:
+        print ("Unknown command: {}".format(sys.argv[1]))
         
 if __name__ == "__main__":
     tf.app.run()
