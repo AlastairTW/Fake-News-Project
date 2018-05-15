@@ -1,0 +1,15 @@
+.queryCard.mdl-card {
+  width: 320px;
+  height: 380px;
+}
+.queryCard > .mdl-card__title {
+  color: #fff;
+  background-image: url('../images/cardBg.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  transition: background 1s linear;
+}
+.mdl-card__title-text {
+  text-shadow: 1px 1px #333;
+}

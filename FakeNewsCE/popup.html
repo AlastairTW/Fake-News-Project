@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Title -->
+    <title>FakeNewsCE</title>
+
+    <!-- Imported Files -->
+    <link rel="stylesheet" href="css/material.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/material.min.js"></script>
+    <script src="js/popup.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  </head>
+
+  <body>
+
+    <!-- Popup card -->
+    <div class="queryCard mdl-card mdl-shadow--2dp">
+
+      <div class="mdl-card__title mdl-card--expand">
+        <h2 class="mdl-card__title-text">Fake News?</h2>
+      </div>
+
+      <div class="mdl-card__supporting-text">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" id="sendBtn">
+          Check This Article!
+        </button>
+      </div>
+
+      <div class="mdl-card__actions mdl-card--border">
+        Do you trust this article?
+        <form action="#">
+          <div class="mdl-textfield mdl-js-textfield">
+            <input class="mdl-textfield__input" type="text" id="emailField" size="35">
+            <label class="mdl-textfield__label" for="emailField">example@lincoln.ac.uk</label>
+          </div>
+        </form>
+
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" id="yesBtn">
+          Yes
+        </button>
+
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" id="noBtn">
+          No
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Confirmation Notification -->
+    <div id="choiceConfirmation" class="mdl-js-snackbar mdl-snackbar">
+      <div class="mdl-snackbar__text"></div>
+      <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+
+  </body>
+</html>
