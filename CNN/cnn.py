@@ -322,4 +322,7 @@ def main(unused_argv):
         print ("Unknown command: {}".format(sys.argv[1]))
         
 if __name__ == "__main__":
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    session = tf.Session(config=config)
     tf.app.run()
