@@ -1,5 +1,5 @@
-//var curntTab = window.location.href;
-var curntTab = "http://www.bbc.co.uk/news/world-middle-east-44116340";
+var curntTab = window.location.href;
+//var curntTab = "http://www.bbc.co.uk/news/world-middle-east-44116340";
 
 
 document.addEventListener('DOMContentLoaded', function()
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function()
 
     sendButton.addEventListener('click', function()
     {
-      var url = "ws://192.168.0.10:5000";
+      var url = "ws://42ba53d1.ngrok.io/HelloWorld:5000";
       cnnws = new WebSocket(url);
       cnnws.onopen = function()
       {
@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', function()
         {
           console.log(x.data);
         }
+      }
+      cnnws.onclose = function(x)
+      {
+        notifContainer.MaterialSnackbar.showSnackbar(x);
       }
     });
 
